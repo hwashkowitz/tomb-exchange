@@ -1,0 +1,39 @@
+name: Fetch prices
+
+on:
+  schedule:
+    # 14:00 UTC daily = 10am ET (summer) / 9am ET (winter).
+    # GitHub delays scheduled runs 10-30 min under load. Fine for a daily job.
+    - cron: "0 14 * * *"
+  workflow_dispatch:        # lets you trigger it by hand from the Actions tab
+
+permissions:
+  contents: write           # required to commit prices.json back to the repo
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # No pip install step — the script uses only the standard library.
+
+      - name: Fetch prices
+        env:
+          EBAY_CLIENT_ID: ${{ secrets.EBAY_CLIENT_ID }}
+          EBAY_CLIENT_SECRET: ${{ secrets.EBAY_CLIENT_SECRET }}
+        run: python3 scripts/fetch_prices.py
+
+      - name: Commit updated prices
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Update prices — ${{ github.run_number }}"
+          file_pattern: prices.json
+          commit_user_name: tomb-bot
+          commit_user_email: tomb-bot@users.noreply.github.com
