@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TOMB — Antiquated Electronics Exchange</title>
+<style>
+  :root {
+    --bg: #0b0d10;
+    --panel: #14181d;
+    --line: #262c34;
+    --text: #e6e9ee;
+    --dim: #8b95a3;
+    --up: #26a65b;
+    --down: #d9534f;
+    --flat: #8b95a3;
+    --accent: #c9a227;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "SF Mono", "Consolas", "Menlo", monospace;
+    font-size: 14px;
+    padding: 20px;
+  }
+  header {
+    border-bottom: 2px solid var(--accent);
+    padding-bottom: 12px;
+    margin-bottom: 18px;
+  }
+  h1 {
+    margin: 0 0 4px;
+    font-size: 22px;
+    letter-spacing: 2px;
+    color: var(--accent);
+  }
+  .sub { color: var(--dim); font-size: 12px; }
+
+  .summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-bottom: 18px;
+  }
+  .stat {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 10px 14px;
+    min-width: 130px;
+  }
+  .stat .label { color: var(--dim); font-size: 11px; text-transform: uppercase; letter-spacing: 1px; }
+  .stat .value { font-size: 19px; margin-top: 3px; }
+
+  .controls { margin-bottom: 12px; color: var(--dim); font-size: 12px; }
+  select {
+    background: var(--panel);
+    color: var(--text);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 5px 8px;
+    font-family: inherit;
+    font-size: 12px;
+  }
+
+  table { width: 100%; border-collapse: collapse; }
+  th {
+    text-align: right;
+    color: var(--dim);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--line);
+    font-weight: normal;
+    white-space: nowrap;
+  }
+  th.l, td.l { text-align: left; }
+  td {
+    text-align: right;
+    padding: 9px 10px;
+    border-bottom: 1px solid var(--line);
+    white-space: nowrap;
+  }
+  tr:hover td { background: var(--panel); }
+  .sym { color: var(--accent); font-weight: bold; }
+  .name { color: var(--text); }
+  .meta { color: var(--dim); font-size: 11px; }
+  .up { color: var(--up); }
+  .down { color: var(--down); }
+  .flat { color: var(--flat); }
+  .spark { vertical-align: middle; }
+
+  footer { margin-top: 20px; color: var(--dim); font-size: 11px; line-height: 1.6; }
+  .warn {
+    background: #2a1f10;
+    border: 1px solid #5c4415;
+    color: #e0c27a;
+    padding: 8px 12px;
+    border-radius: 5px;
+    margin-bottom: 14px;
+    font-size: 12px;
+  }
+  @media (max-width: 700px) {
+    .hide-sm { display: none; }
+    body { padding: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>TOMB EXCHANGE</h1>
+  <div class="sub">Antiquated Electronics &middot; <span id="asof">loading…</span></div>
+</header>
+
+<div id="banner"></div>
+
+<div class="summary">
+  <div class="stat">
+    <div class="label">Total Value</div>
+    <div class="value" id="s-total">—</div>
+  </div>
+  <div class="stat">
+    <div class="label">Session Change</div>
+    <div class="value" id="s-change">—</div>
+  </div>
+  <div class="stat">
+    <div class="label">Listings</div>
+    <div class="value" id="s-count">—</div>
+  </div>
+  <div class="stat">
+    <div class="label">Top Gainer</div>
+    <div class="value" id="s-gain">—</div>
+  </div>
+  <div class="stat">
+    <div class="label">Top Loser</div>
+    <div class="value" id="s-lose">—</div>
+  </div>
+</div>
+
+<div class="controls">
+  Sort:
+  <select id="sort">
+    <option value="value-desc">Value (high → low)</option>
+    <option value="value-asc">Value (low → high)</option>
+    <option value="change-desc">Change % (high → low)</option>
+    <option value="change-asc">Change % (low → high)</option>
+    <option value="symbol">Symbol (A → Z)</option>
+    <option value="year">Year (old → new)</option>
+  </select>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th class="l">Sym</th>
+      <th class="l">Item</th>
+      <th class="hide-sm">Trend</th>
+      <th>Last</th>
+      <th>Chg</th>
+      <th>Chg %</th>
+      <th class="hide-sm">Low</th>
+      <th class="hide-sm">High</th>
+      <th class="hide-sm">Pts</th>
+    </tr>
+  </thead>
+  <tbody id="rows"></tbody>
+</table>
+
+<footer id="foot"></footer>
+
+<script>
+"use strict";
+
+/* ---------- fallback seed (used only if prices.json can't be fetched) ---------- */
+const SEED = {
+  schema: 1,
+  updated: "2026-08-17T12:00:00Z",
+  source: "seed-embedded",
+  items: [
+    { id:"mbp-a1502",    symbol:"MBP",  name:'MacBook Pro 13" Retina',     model:"A1502",  year:2015, condition:"A little battered", history:[{date:"2026-08-17",price:110.00}] },
+    { id:"iphone-a1203", symbol:"IPH1", name:"iPhone (1st gen)",            model:"A1203",  year:2007, condition:"Battered",          history:[{date:"2026-08-17",price:150.00}] },
+    { id:"ipod-m8541",   symbol:"POD1", name:"iPod (1st gen, scroll wheel)",model:"M8541",  year:2001, condition:"Battered",          history:[{date:"2026-08-17",price:130.00}] },
+    { id:"xbox-og",      symbol:"XBOX", name:"Xbox (original)",             model:"Xbox",   year:2001, condition:"Externally fine",   history:[{date:"2026-08-17",price:75.00}] },
+    { id:"ipad-a1337",   symbol:"IPD1", name:"iPad (1st gen)",              model:"A1337",  year:2010, condition:"Near-mint",         history:[{date:"2026-08-17",price:68.00}] },
+    { id:"ipad-a1395",   symbol:"IPD2", name:"iPad 2",                      model:"A1395",  year:2011, condition:"Mint",              history:[{date:"2026-08-17",price:58.00}] },
+    { id:"ipod-a1059",   symbol:"POD4", name:"iPod (4th gen, click wheel)", model:"A1059",  year:2004, condition:"Near-mint",         history:[{date:"2026-08-17",price:58.00}] },
+    { id:"iphone-a1387", symbol:"IP4S", name:"iPhone 4S",                   model:"A1387",  year:2011, condition:"Near-mint",         history:[{date:"2026-08-17",price:45.00}] },
+    { id:"sansa-fuze",   symbol:"FUZE", name:"SanDisk Sansa Fuze",          model:"N17819", year:2008, condition:"Mint-in-box",       history:[{date:"2026-08-17",price:40.00}] },
+    { id:"iphone-a1241", symbol:"IP3G", name:"iPhone 3G",                   model:"A1241",  year:2008, condition:"Near-mint",         history:[{date:"2026-08-17",price:38.00}] },
+    { id:"iphone-a1549", symbol:"IP6",  name:"iPhone 6",                    model:"A1549",  year:2014, condition:"Scratched up",      history:[{date:"2026-08-17",price:32.00}] },
+    { id:"ipod-a1051",   symbol:"MINI", name:"iPod mini (2nd gen)",         model:"A1051",  year:2005, condition:"Screen burn",       history:[{date:"2026-08-17",price:18.00}] },
+    { id:"moto-w755",    symbol:"MOTO", name:"Motorola Moto W755",          model:"W755",   year:2008, condition:"Battered",          history:[{date:"2026-08-17",price:12.00}] }
+  ]
+};
+
+/* ---------- numeric helpers (the part that has to be right) ---------- */
+
+// Valid price = finite number > 0. Anything else is "no reading".
+function isPrice(p) {
+  return typeof p === "number" && isFinite(p) && p > 0;
+}
+
+// Pull the clean, ordered list of valid price points from an item's history.
+function series(item) {
+  const h = Array.isArray(item.history) ? item.history : [];
+  return h
+    .filter(pt => pt && isPrice(pt.price))
+    .map(pt => ({ date: String(pt.date || ""), price: pt.price }));
+}
+
+function lastPrice(s)  { return s.length >= 1 ? s[s.length - 1].price : null; }
+function prevPrice(s)  { return s.length >= 2 ? s[s.length - 2].price : null; }
+
+// Absolute change vs previous reading. Null when there's no previous reading.
+function absChange(s) {
+  const cur = lastPrice(s), prev = prevPrice(s);
+  if (cur === null || prev === null) return null;
+  return cur - prev;
+}
+
+// Percent change. Null when no previous reading OR previous is 0 (no div by zero).
+function pctChange(s) {
+  const cur = lastPrice(s), prev = prevPrice(s);
+  if (cur === null || prev === null) return null;
+  if (prev === 0) return null;
+  return ((cur - prev) / prev) * 100;
+}
+
+function seriesLow(s)  { return s.length ? Math.min(...s.map(p => p.price)) : null; }
+function seriesHigh(s) { return s.length ? Math.max(...s.map(p => p.price)) : null; }
+
+function money(n) {
+  if (n === null || n === undefined || !isFinite(n)) return "—";
+  const sign = n < 0 ? "-" : "";
+  return sign + "$" + Math.abs(n).toLocaleString("en-US", {
+    minimumFractionDigits: 2, maximumFractionDigits: 2
+  });
+}
+
+function signedMoney(n) {
+  if (n === null || n === undefined || !isFinite(n)) return "—";
+  const s = money(Math.abs(n));
+  if (n > 0) return "+" + s;
+  if (n < 0) return "-" + s;
+  return s;
+}
+
+function signedPct(n) {
+  if (n === null || n === undefined || !isFinite(n)) return "—";
+  const v = Math.abs(n).toFixed(2) + "%";
+  if (n > 0) return "+" + v;
+  if (n < 0) return "-" + v;
+  return "0.00%";
+}
+
+// Direction class. Treats exact 0 and null distinctly.
+function dirClass(n) {
+  if (n === null || n === undefined || !isFinite(n)) return "flat";
+  if (n > 0) return "up";
+  if (n < 0) return "down";
+  return "flat";
+}
+
+// Sparkline path. Handles: empty, single point, and perfectly flat series.
+function sparkPath(s, w, h, pad) {
+  if (!s.length) return "";
+  const prices = s.map(p => p.price);
+  const min = Math.min(...prices), max = Math.max(...prices);
+  const yTop = pad, yBot = h - pad;
+
+  function yFor(p) {
+    if (max === min) return (yTop + yBot) / 2;        // flat line, dead center
+    return yBot - ((p - min) / (max - min)) * (yBot - yTop);
+  }
+  function xFor(i) {
+    if (s.length === 1) return w / 2;                  // single point, center it
+    return (i / (s.length - 1)) * w;
+  }
+
+  if (s.length === 1) {
+    const x = xFor(0), y = yFor(prices[0]);
+    return `M ${x - 3} ${y} L ${x + 3} ${y}`;          // tiny dash so it's visible
+  }
+  return prices.map((p, i) => `${i === 0 ? "M" : "L"} ${xFor(i).toFixed(2)} ${yFor(p).toFixed(2)}`).join(" ");
+}
+
+/* ---------- aggregate stats ---------- */
+
+function computeSummary(items) {
+  let total = 0;
+  let priorTotal = 0;
+  let comparable = 0;      // items that have both a current and previous reading
+  let counted = 0;         // items with any current reading
+
+  for (const it of items) {
+    const s = series(it);
+    const cur = lastPrice(s);
+    if (cur === null) continue;
+    total += cur;
+    counted++;
+
+    const prev = prevPrice(s);
+    if (prev !== null) {
+      priorTotal += prev;
+      comparable++;
+    }
+  }
+
+  // Session change is only meaningful across items that have a prior reading.
+  // Comparing a full current total against a partial prior total would be wrong.
+  let changeAbs = null, changePct = null;
+  if (comparable > 0) {
+    let curOfComparable = 0;
+    for (const it of items) {
+      const s = series(it);
+      if (lastPrice(s) !== null && prevPrice(s) !== null) curOfComparable += lastPrice(s);
+    }
+    changeAbs = curOfComparable - priorTotal;
+    changePct = priorTotal === 0 ? null : (changeAbs / priorTotal) * 100;
+  }
+
+  return { total, counted, comparable, changeAbs, changePct };
+}
+
+function extremes(items) {
+  let best = null, worst = null;
+  for (const it of items) {
+    const p = pctChange(series(it));
+    if (p === null) continue;
+    if (best === null || p > best.pct) best = { sym: it.symbol, pct: p };
+    if (worst === null || p < worst.pct) worst = { sym: it.symbol, pct: p };
+  }
+  return { best, worst };
+}
+
+/* ---------- sorting ---------- */
+
+function sortItems(items, mode) {
+  const arr = items.slice();
+  // Items with no reading always sink to the bottom, whatever the mode.
+  const val = it => lastPrice(series(it));
+  const pct = it => pctChange(series(it));
+
+  const nullsLast = (a, b, cmp) => {
+    if (a === null && b === null) return 0;
+    if (a === null) return 1;
+    if (b === null) return -1;
+    return cmp;
+  };
+
+  switch (mode) {
+    case "value-asc":
+      arr.sort((x, y) => { const a = val(x), b = val(y); return nullsLast(a, b, a - b); }); break;
+    case "change-desc":
+      arr.sort((x, y) => { const a = pct(x), b = pct(y); return nullsLast(a, b, b - a); }); break;
+    case "change-asc":
+      arr.sort((x, y) => { const a = pct(x), b = pct(y); return nullsLast(a, b, a - b); }); break;
+    case "symbol":
+      arr.sort((x, y) => String(x.symbol).localeCompare(String(y.symbol))); break;
+    case "year":
+      arr.sort((x, y) => (x.year || 0) - (y.year || 0)); break;
+    case "value-desc":
+    default:
+      arr.sort((x, y) => { const a = val(x), b = val(y); return nullsLast(a, b, b - a); }); break;
+  }
+  return arr;
+}
+
+/* ---------- rendering ---------- */
+
+let DATA = null;
+
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, c => (
+    { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]
+  ));
+}
+
+function render() {
+  if (!DATA) return;
+  const items = sortItems(DATA.items, document.getElementById("sort").value);
+
+  const sum = computeSummary(DATA.items);
+  const ext = extremes(DATA.items);
+
+  document.getElementById("s-total").textContent = money(sum.total);
+  document.getElementById("s-count").textContent = sum.counted;
+
+  const chgEl = document.getElementById("s-change");
+  if (sum.changeAbs === null) {
+    chgEl.textContent = "—";
+    chgEl.className = "value flat";
+  } else {
+    chgEl.textContent = signedMoney(sum.changeAbs) + " (" + signedPct(sum.changePct) + ")";
+    chgEl.className = "value " + dirClass(sum.changeAbs);
+  }
+
+  const gEl = document.getElementById("s-gain");
+  const lEl = document.getElementById("s-lose");
+  if (ext.best) {
+    gEl.textContent = ext.best.sym + " " + signedPct(ext.best.pct);
+    gEl.className = "value " + dirClass(ext.best.pct);
+  } else { gEl.textContent = "—"; gEl.className = "value flat"; }
+  if (ext.worst) {
+    lEl.textContent = ext.worst.sym + " " + signedPct(ext.worst.pct);
+    lEl.className = "value " + dirClass(ext.worst.pct);
+  } else { lEl.textContent = "—"; lEl.className = "value flat"; }
+
+  const rows = items.map(it => {
+    const s = series(it);
+    const cur = lastPrice(s);
+    const chg = absChange(s);
+    const pct = pctChange(s);
+    const lo = seriesLow(s), hi = seriesHigh(s);
+    const cls = dirClass(pct);
+    const strokeVar = cls === "up" ? "var(--up)" : cls === "down" ? "var(--down)" : "var(--flat)";
+    const path = sparkPath(s, 90, 26, 3);
+
+    return `<tr>
+      <td class="l sym">${esc(it.symbol)}</td>
+      <td class="l">
+        <div class="name">${esc(it.name)}</div>
+        <div class="meta">${esc(it.model)} &middot; ${esc(it.year)} &middot; ${esc(it.condition || "")}</div>
+      </td>
+      <td class="hide-sm">
+        <svg class="spark" width="90" height="26" viewBox="0 0 90 26">
+          <path d="${path}" fill="none" stroke="${strokeVar}" stroke-width="1.6"
+                stroke-linejoin="round" stroke-linecap="round"/>
+        </svg>
+      </td>
+      <td>${money(cur)}</td>
+      <td class="${cls}">${signedMoney(chg)}</td>
+      <td class="${cls}">${signedPct(pct)}</td>
+      <td class="hide-sm">${money(lo)}</td>
+      <td class="hide-sm">${money(hi)}</td>
+      <td class="hide-sm">${s.length}</td>
+    </tr>`;
+  }).join("");
+
+  document.getElementById("rows").innerHTML = rows;
+
+  const noPrior = sum.comparable === 0;
+  document.getElementById("foot").innerHTML =
+    `Prices are the trimmed median of active listings, adjusted for each unit's actual condition. ` +
+    `They reflect what sellers are asking, not confirmed sale prices — treat them as directional. ` +
+    (noPrior
+      ? `<br><strong>Only one reading exists so far</strong>, so change columns are empty by design rather than showing a fabricated 0.00%.`
+      : `<br>Change columns compare the latest reading against the one before it.`);
+}
+
+function setBanner(msg) {
+  document.getElementById("banner").innerHTML = msg ? `<div class="warn">${esc(msg)}</div>` : "";
+}
+
+function applyData(d, warning) {
+  DATA = d;
+  const when = d.updated ? new Date(d.updated) : null;
+  document.getElementById("asof").textContent =
+    (when && !isNaN(when)) ? "as of " + when.toLocaleString() : "date unknown";
+  setBanner(warning);
+  render();
+}
+
+async function boot() {
+  document.getElementById("sort").addEventListener("change", render);
+  try {
+    const res = await fetch("prices.json", { cache: "no-store" });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    const d = await res.json();
+    if (!d || !Array.isArray(d.items)) throw new Error("malformed prices.json");
+    applyData(d, null);
+  } catch (err) {
+    applyData(SEED, "Could not load prices.json (" + err.message + ") — showing embedded seed data.");
+  }
+}
+
+boot();
+</script>
+
+</body>
+</html>

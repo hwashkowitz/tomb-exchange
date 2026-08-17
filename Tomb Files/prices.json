@@ -1,0 +1,216 @@
+{
+  "schema": 1,
+  "updated": "2026-08-17T12:00:00Z",
+  "source": "seed",
+  "note": "Seed prices researched manually 2026-08-17 from active eBay listings. History grows one entry per successful fetch run.",
+  "items": [
+    {
+      "id": "mbp-a1502",
+      "symbol": "MBP",
+      "name": "MacBook Pro 13\" Retina",
+      "model": "A1502",
+      "year": 2015,
+      "brand": "Apple",
+      "type": "Laptop",
+      "condition": "A little battered",
+      "conditionFactor": 0.8,
+      "query": "A1502 MacBook Pro 13 retina",
+      "excludeTerms": ["battery", "logic board", "lcd", "screen assembly", "parts", "charger", "ssd", "keyboard"],
+      "history": [
+        { "date": "2026-08-17", "price": 110.0, "samples": 0, "source": "seed" }
+      ]
+    },
+    {
+      "id": "iphone-a1203",
+      "symbol": "IPH1",
+      "name": "iPhone (1st gen)",
+      "model": "A1203",
+      "year": 2007,
+      "brand": "Apple",
+      "type": "Cell Phone",
+      "condition": "Battered",
+      "conditionFactor": 0.6,
+      "query": "A1203 iPhone 1st generation 8GB",
+      "excludeTerms": ["battery", "screen", "parts", "case", "box only", "sealed", "digitizer"],
+      "history": [
+        { "date": "2026-08-17", "price": 150.0, "samples": 0, "source": "seed" }
+      ]
+    },
+    {
+      "id": "ipod-m8541",
+      "symbol": "POD1",
+      "name": "iPod (1st gen, scroll wheel)",
+      "model": "M8541",
+      "year": 2001,
+      "brand": "Apple",
+      "type": "Media Player",
+      "condition": "Battered",
+      "conditionFactor": 0.6,
+      "query": "M8541 iPod 1st generation 5GB",
+      "excludeTerms": ["battery", "parts", "case", "cable", "sealed", "hard drive"],
+      "history": [
+        { "date": "2026-08-17", "price": 130.0, "samples": 0, "source": "seed" }
+      ]
+    },
+    {
+      "id": "xbox-og",
+      "symbol": "XBOX",
+      "name": "Xbox (original)",
+      "model": "Microsoft Xbox",
+      "year": 2001,
+      "brand": "Microsoft",
+      "type": "Console",
+      "condition": "Externally fine",
+      "conditionFactor": 0.95,
+      "query": "original xbox console 2001",
+      "excludeTerms": ["360", "series x", "series s", "one", "controller only", "parts", "game", "modded", "chipped"],
+      "history": [
+        { "date": "2026-08-17", "price": 75.0, "samples": 0, "source": "seed" }
+      ]
+    },
+    {
+      "id": "ipad-a1337",
+      "symbol": "IPD1",
+      "name": "iPad (1st gen)",
+      "model": "A1337",
+      "year": 2010,
+      "brand": "Apple",
+      "type": "Tablet",
+      "condition": "Near-mint",
+      "conditionFactor": 1.1,
+      "query": "A1337 iPad 1st generation",
+      "excludeTerms": ["screen", "digitizer", "parts", "case", "charger", "battery"],
+      "history": [
+        { "date": "2026-08-17", "price": 68.0, "samples": 0, "source": "seed" }
+      ]
+    },
+    {
+      "id": "ipad-a1395",
+      "symbol": "IPD2",
+      "name": "iPad 2",
+      "model": "A1395",
+      "year": 2011,
+      "brand": "Apple",
+      "type": "Tablet",
+      "condition": "Mint",
+      "conditionFactor": 1.2,
+      "query": "A1395 iPad 2 wifi",
+      "excludeTerms": ["screen", "digitizer", "parts", "case", "charger", "battery", "locked"],
+      "history": [
+        { "date": "2026-08-17", "price": 58.0, "samples": 0, "source": "seed" }
+      ]
+    },
+    {
+      "id": "ipod-a1059",
+      "symbol": "POD4",
+      "name": "iPod (4th gen, click wheel)",
+      "model": "A1059",
+      "year": 2004,
+      "brand": "Apple",
+      "type": "Media Player",
+      "condition": "Near-mint",
+      "conditionFactor": 1.1,
+      "query": "A1059 iPod 4th generation click wheel",
+      "excludeTerms": ["battery", "parts", "case", "broken", "for parts", "hard drive"],
+      "history": [
+        { "date": "2026-08-17", "price": 58.0, "samples": 0, "source": "seed" }
+      ]
+    },
+    {
+      "id": "iphone-a1387",
+      "symbol": "IP4S",
+      "name": "iPhone 4S",
+      "model": "A1387",
+      "year": 2011,
+      "brand": "Apple",
+      "type": "Cell Phone",
+      "condition": "Near-mint",
+      "conditionFactor": 1.1,
+      "query": "A1387 iPhone 4S unlocked",
+      "excludeTerms": ["screen", "parts", "case", "battery", "digitizer", "sealed", "icloud locked"],
+      "history": [
+        { "date": "2026-08-17", "price": 45.0, "samples": 0, "source": "seed" }
+      ]
+    },
+    {
+      "id": "sansa-fuze",
+      "symbol": "FUZE",
+      "name": "SanDisk Sansa Fuze",
+      "model": "N17819",
+      "year": 2008,
+      "brand": "SanDisk",
+      "type": "MP3 Player",
+      "condition": "Mint-in-box",
+      "conditionFactor": 1.35,
+      "query": "SanDisk Sansa Fuze MP3 player",
+      "excludeTerms": ["fuze+", "fuze plus", "clip", "parts", "case", "charger only", "screen"],
+      "history": [
+        { "date": "2026-08-17", "price": 40.0, "samples": 0, "source": "seed" }
+      ]
+    },
+    {
+      "id": "iphone-a1241",
+      "symbol": "IP3G",
+      "name": "iPhone 3G",
+      "model": "A1241",
+      "year": 2008,
+      "brand": "Apple",
+      "type": "Cell Phone",
+      "condition": "Near-mint",
+      "conditionFactor": 1.1,
+      "query": "A1241 iPhone 3G",
+      "excludeTerms": ["box only", "screen", "parts", "case", "battery", "digitizer", "3GS"],
+      "history": [
+        { "date": "2026-08-17", "price": 38.0, "samples": 0, "source": "seed" }
+      ]
+    },
+    {
+      "id": "iphone-a1549",
+      "symbol": "IP6",
+      "name": "iPhone 6",
+      "model": "A1549",
+      "year": 2014,
+      "brand": "Apple",
+      "type": "Cell Phone",
+      "condition": "Scratched up",
+      "conditionFactor": 0.75,
+      "query": "A1549 iPhone 6 unlocked",
+      "excludeTerms": ["plus", "6s", "screen", "parts", "case", "battery", "icloud locked"],
+      "history": [
+        { "date": "2026-08-17", "price": 32.0, "samples": 0, "source": "seed" }
+      ]
+    },
+    {
+      "id": "ipod-a1051",
+      "symbol": "MINI",
+      "name": "iPod mini (2nd gen)",
+      "model": "A1051",
+      "year": 2005,
+      "brand": "Apple",
+      "type": "Media Player",
+      "condition": "Screen burn",
+      "conditionFactor": 0.55,
+      "query": "A1051 iPod mini 4GB",
+      "excludeTerms": ["battery", "parts", "case", "for parts", "not working", "shell", "housing"],
+      "history": [
+        { "date": "2026-08-17", "price": 18.0, "samples": 0, "source": "seed" }
+      ]
+    },
+    {
+      "id": "moto-w755",
+      "symbol": "MOTO",
+      "name": "Motorola Moto W755",
+      "model": "W755",
+      "year": 2008,
+      "brand": "Motorola",
+      "type": "Cell Phone",
+      "condition": "Battered",
+      "conditionFactor": 0.6,
+      "query": "Motorola W755 flip phone",
+      "excludeTerms": ["battery", "parts", "case", "charger only", "housing", "screen"],
+      "history": [
+        { "date": "2026-08-17", "price": 12.0, "samples": 0, "source": "seed" }
+      ]
+    }
+  ]
+}
